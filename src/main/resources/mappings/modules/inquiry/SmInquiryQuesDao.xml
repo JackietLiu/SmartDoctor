@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.inquiry.dao.SmInquiryQuesDao">
+    
+	<sql id="smInquiryQuesColumns">
+		a.id AS "id",
+		a.inqu_id AS "inqu.id",
+		a.ques_id AS "question.id",
+		a.ques_name AS "quesName",
+		a.opt_id AS "opt.id",
+		a.opt_name AS "optName",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.sym_id as "sym.id",
+		a.sort as "sort",
+		a.dept as "dept",
+		a.sq_id as "symQues.id",
+		a.state as "state",
+		a.illrea_id as "illrea.id",
+		b.name as "illrea.name",
+		c.is_first as "symQues.isFirst"
+	</sql>
+	
+	<sql id="smInquiryQuesJoins">
+	left join sm_illreason b on a.illrea_id = b.id
+	left join sm_sym_ques c on c.id = a.sq_id 
+	</sql>
+    
+	<select id="get" resultType="SmInquiryQues">
+		SELECT 
+			<include refid="smInquiryQuesColumns"/>
+		FROM sm_inquiry_ques a
+		<include refid="smInquiryQuesJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findFirstLast" resultType="SmInquiryQues" parameterType="SmInquiryQues">
+		SELECT 
+			<include refid="smInquiryQuesColumns"/>
+		FROM sm_inquiry_ques a
+		<include refid="smInquiryQuesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="inqu != null and inqu.id != null and inqu.id != ''">
+				AND a.inqu_id = #{inqu.id}
+			</if>
+			<if test="question != null and question.id != null and question.id != ''">
+				AND a.ques_id = #{question.id}
+			</if>
+			<if test="opt != null and opt.id != null and opt.id != ''">
+				AND a.opt_id = #{opt.id}
+			</if>
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illrea_id = #{illrea.id}
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+			<if test="dept != null and dept != ''">
+				AND a.dept = #{dept}
+			</if>
+		</where>
+		order by a.create_date DESC 
+		limit 0,1
+	</select>
+	
+	<select id="findList" resultType="SmInquiryQues">
+		SELECT 
+			<include refid="smInquiryQuesColumns"/>
+		FROM sm_inquiry_ques a
+		<include refid="smInquiryQuesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="inqu != null and inqu.id != null and inqu.id != ''">
+				AND a.inqu_id = #{inqu.id}
+			</if>
+			<if test="question != null and question.id != null and question.id != ''">
+				AND a.ques_id = #{question.id}
+			</if>
+			<if test="quesName != null and quesName != ''">
+				AND a.ques_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{quesName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{quesName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{quesName},'%')</if>
+			</if>
+			<if test="opt != null and opt.id != null and opt.id != ''">
+				AND a.opt_id = #{opt.id}
+			</if>
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illrea_id = #{illrea.id}
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+			<if test="dept != null and dept != ''">
+				AND a.dept = #{dept}
+			</if>
+			<if test="optName != null and optName != ''">
+				AND a.opt_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{optName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{optName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{optName},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findListOther" resultType="SmInquiryQues" parameterType="SmInquiryQues">
+		SELECT 
+			<include refid="smInquiryQuesColumns"/>
+		FROM sm_inquiry_ques a
+		<include refid="smInquiryQuesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="inqu != null and inqu.id != null and inqu.id != ''">
+				AND a.inqu_id = #{inqu.id}
+			</if>
+			<if test="question != null and question.id != null and question.id != ''">
+				AND a.ques_id = #{question.id}
+			</if>
+			<if test="quesName != null and quesName != ''">
+				AND a.ques_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{quesName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{quesName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{quesName},'%')</if>
+			</if>
+			<if test="opt != null and opt.id != null and opt.id != ''">
+				AND a.opt_id = #{opt.id}
+			</if>
+			<if test="optName != null and optName != ''">
+				AND a.opt_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{optName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{optName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{optName},'%')</if>
+			</if>
+		</where>
+		ORDER BY a.state ASC, a.dept ASC
+	</select>
+	
+	<select id="findAllList" resultType="SmInquiryQues">
+		SELECT 
+			<include refid="smInquiryQuesColumns"/>
+		FROM sm_inquiry_ques a
+		<include refid="smInquiryQuesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_inquiry_ques(
+			id,
+			inqu_id,
+			ques_id,
+			ques_name,
+			opt_id,
+			opt_name,
+			create_date,
+			update_date,
+			del_flag,
+			sym_id,
+			sort,
+			dept,
+			sq_id,
+			state,
+			illrea_id
+		) VALUES (
+			#{id},
+			#{inqu.id},
+			#{question.id},
+			#{quesName},
+			#{opt.id},
+			#{optName},
+			#{createDate},
+			#{updateDate},
+			#{delFlag},
+			#{sym.id},
+			#{sort},
+			#{dept},
+			#{symQues.id},
+			#{state},
+			#{illrea.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_inquiry_ques SET 	
+			inqu_id = #{inqu.id},
+			ques_id = #{question.id},
+			ques_name = #{quesName},
+			opt_id = #{opt.id},
+			opt_name = #{optName},
+			update_date = #{updateDate},
+			sym_id = #{sym.id},
+			sort = #{sort},
+			dept = #{dept},
+			sq_id = #{symQues.id},
+			state = #{state},
+			illrea_id = #{illrea.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_inquiry_ques SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<update id="deleteBy" parameterType="SmInquiryQues">
+		UPDATE sm_inquiry_ques SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<where>
+			inqu_id = #{inqu.id}
+			<if test="question != null and question.id != null and question.id != ''">
+				AND ques_id = #{question.id}
+			</if>
+			<if test="sort != null and sort != ''">
+				AND sort  <![CDATA[ >= ]]>  #{sort}
+			</if>
+		</where>
+	</update>
+	
+</mapper>

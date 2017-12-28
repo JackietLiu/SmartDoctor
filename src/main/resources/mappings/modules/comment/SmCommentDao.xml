@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.comment.dao.SmCommentDao">
+    
+	<sql id="smCommentColumns">
+		a.id AS "id",
+		a.match_id AS "match.id",
+		a.co_type AS "coType",
+		a.audit_status AS "auditStatus",
+		a.co_status_doc AS "coStatusDoc",
+		a.co_status_sick AS "coStatusSick",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		u.name as "createBy.name",
+		b.name as "match.name"
+	</sql>
+	
+	<sql id="smCommentJoins">
+	left join sys_user u on u.id = a.create_by
+	left join sm_illreason_match b on b.id = a.match_id
+	</sql>
+    
+	<select id="get" resultType="SmComment">
+		SELECT 
+			<include refid="smCommentColumns"/>
+		FROM sm_comment a
+		<include refid="smCommentJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmComment">
+		SELECT 
+			<include refid="smCommentColumns"/>
+		FROM sm_comment a
+		<include refid="smCommentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="match != null and match.id != null and match.id != ''">
+				AND a.match_id = #{match.id}
+			</if>
+			<if test="coType != null and coType != ''">
+				AND a.co_type = #{coType}
+			</if>
+			<if test="auditStatus != null and auditStatus != ''">
+				AND a.audit_status = #{auditStatus}
+			</if>
+			<if test="coStatusDoc != null and coStatusDoc != ''">
+				AND a.co_status_doc = #{coStatusDoc}
+			</if>
+			<if test="coStatusSick != null and coStatusSick != ''">
+				AND a.co_status_sick = #{coStatusSick}
+			</if>
+			<if test="createBy != null and createBy.name != null and createBy.name != ''">
+				AND u.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{createBy.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{createBy.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{createBy.name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmComment">
+		SELECT 
+			<include refid="smCommentColumns"/>
+		FROM sm_comment a
+		<include refid="smCommentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_comment(
+			id,
+			match_id,
+			co_type,
+			audit_status,
+			co_status_doc,
+			co_status_sick,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{match.id},
+			#{coType},
+			#{auditStatus},
+			#{coStatusDoc},
+			#{coStatusSick},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_comment SET 	
+			match_id = #{match.id},
+			co_type = #{coType},
+			audit_status = #{auditStatus},
+			co_status_doc = #{coStatusDoc},
+			co_status_sick = #{coStatusSick},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_comment SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

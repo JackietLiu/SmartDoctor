@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.inquiry.dao.SmInquiryAdviceDao">
+    
+	<sql id="smInquiryAdviceColumns">
+		a.id AS "id",
+		a.inqu_id AS "inqu.id",
+		a.re_status AS "reStatus",
+		a.adv_id AS "adv.id",
+		a.name AS "name",
+		a.description AS "description",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.illrea_id as "illrea.id",
+		a.illreaname as "illreaname",
+		a.illreadesc as "illreadesc",
+		a.state as "state",
+		a.answer_illrea_id as "answerIllrea.id",
+		b.period AS "adv.period",
+		b.period_unit AS"adv.periodUnit",
+		b.dt_nextvisit AS "adv.dt_nextvisit",
+		d.food AS "adv.heath.food",
+		d.suggest AS "adv.heath.suggest",
+		c.med_name AS "adv.med.medName",
+		c.dose AS "adv.med.dose",
+		c.medication AS "adv.med.medication",
+		c.dose_unit AS "adv.med.doseUnit",
+		c.medication_unit AS "adv.med.medicationUnit",
+		c.effects AS "adv.med.effects",
+		c.work_time AS "adv.med.workTime",
+		c.duration_time AS "adv.med.durationTime"
+	</sql>
+	
+	<sql id="smInquiryAdviceJoins">
+	LEFT JOIN sm_advise b ON b.id=a.adv_id 
+    LEFT JOIN sm_medicine c ON b.med_id=c.id 
+	LEFT JOIN sm_healthy d ON d.id=b.heath_id
+	    
+	</sql>
+    
+	<select id="get" resultType="SmInquiryAdvice">
+		SELECT 
+			<include refid="smInquiryAdviceColumns"/>
+		FROM sm_inquiry_advice a
+		<include refid="smInquiryAdviceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmInquiryAdvice">
+		SELECT 
+			<include refid="smInquiryAdviceColumns"/>
+		FROM sm_inquiry_advice a
+		<include refid="smInquiryAdviceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="inqu != null and inqu.id != null and inqu.id != ''">
+				AND a.inqu_id = #{inqu.id}
+			</if>
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illrea_id = #{illrea.id}
+			</if>
+			<if test="reStatus != null and reStatus != ''">
+				AND a.re_status = #{reStatus}
+			</if>
+			<if test="adv != null and adv.id != null and adv.id != ''">
+				AND a.adv_id = #{adv.id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+			<if test="answerIllrea != null and answerIllrea.id != null and answerIllrea.id != ''">
+				AND a.answer_illrea_id = #{answerIllrea.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmInquiryAdvice">
+		SELECT 
+			<include refid="smInquiryAdviceColumns"/>
+		FROM sm_inquiry_advice a
+		<include refid="smInquiryAdviceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert" >
+		INSERT INTO sm_inquiry_advice(
+			id,
+			inqu_id,
+			re_status,
+			adv_id,
+			name,
+			description,
+			create_date,
+			update_date,
+			del_flag,
+			illrea_id,
+			illreaname,
+			illreadesc,
+			state,
+			answer_illrea_id
+		) VALUES (
+			#{id},
+			#{inqu.id},
+			#{reStatus},
+			#{adv.id},
+			#{name},
+			#{description},
+			#{createDate},
+			#{updateDate},
+			#{delFlag},
+			#{illrea.id},
+			#{illreaname},
+			#{illreadesc},
+			#{state},
+			#{answerIllrea.id}
+		)
+	</insert>
+	
+
+	
+	
+	
+	<update id="update">
+		UPDATE sm_inquiry_advice SET 	
+			inqu_id = #{inqu.id},
+			re_status = #{reStatus},
+			adv_id = #{adv.id},
+			name = #{name},
+			description = #{description},
+			update_date = #{updateDate},
+			illrea_id = #{illrea.id},
+			illreaname = #{illreadesc},
+			illreadesc = #{illreadesc},
+			state = #{state},
+			answer_illrea_id = #{answerIllrea.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_inquiry_advice SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

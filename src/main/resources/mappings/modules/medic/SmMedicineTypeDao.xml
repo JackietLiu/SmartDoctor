@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.medic.dao.SmMedicineTypeDao">
+    
+	<sql id="smMedicineTypeColumns">
+		a.id AS "id",
+		a.type_name AS "typeName",
+		a.parent_id AS "parent.id",
+		a.create_by AS "createBy.id",
+		a.parent_ids AS "parentIds",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="smMedicineTypeJoins">
+	</sql>
+    
+	<select id="get" resultType="SmMedicineType">
+		SELECT 
+			<include refid="smMedicineTypeColumns"/>
+		FROM sm_medicine_type a
+		<include refid="smMedicineTypeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmMedicineType">
+		SELECT 
+			<include refid="smMedicineTypeColumns"/>
+		FROM sm_medicine_type a
+		<include refid="smMedicineTypeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="typeName != null and typeName != ''">
+				AND a.type_name = #{typeName}
+			</if>
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+			<if test="parentIds != null and parentIds != ''">
+				AND a.parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%'||#{parentIds}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{parentIds}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{parentIds},'%')</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="SmMedicineType">
+		SELECT 
+			<include refid="smMedicineTypeColumns"/>
+		FROM sm_medicine_type a
+		<include refid="smMedicineTypeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findByParentIdsLike" resultType="SmMedicineType">
+		SELECT
+			a.id,
+			a.parent_id AS "parent.id",
+			a.parent_ids
+		FROM sm_medicine_type a
+		<include refid="smMedicineTypeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.parent_ids LIKE #{parentIds}
+		</where>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_medicine_type(
+			id,
+			type_name,
+			parent_id,
+			create_by,
+			parent_ids,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{typeName},
+			#{parent.id},
+			#{createBy.id},
+			#{parentIds},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_medicine_type SET 	
+			type_name = #{typeName},
+			parent_id = #{parent.id},
+			parent_ids = #{parentIds},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateParentIds">
+		UPDATE sm_medicine_type SET 
+			parent_id = #{parent.id}, 
+			parent_ids = #{parentIds}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_medicine_type SET  
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id} OR parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%'||#{parentIds}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{parentIds}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{parentIds},'%')</if>
+	</update>
+	
+</mapper>

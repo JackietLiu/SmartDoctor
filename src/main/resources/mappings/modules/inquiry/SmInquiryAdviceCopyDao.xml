@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.inquiry.dao.SmInquiryAdviceCopyDao">
+    
+	<sql id="smInquiryAdviceCopyColumns">
+		a.id AS "id",
+		a.inqu_id AS "inqu.id",
+		a.re_status AS "reStatus",
+		a.illrea_id AS "illrea.id",
+		a.illreaname AS "illreaname",
+		a.illreadesc AS "illreadesc",
+		a.adv_id AS "adv.id",
+		a.name AS "name",
+		a.description AS "description",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.state AS "state",
+		a.answer_illrea_id AS "answerIllrea.id",
+		a.old_id AS "old.id"
+	</sql>
+	
+	<sql id="smInquiryAdviceCopyJoins">
+	</sql>
+    
+	<select id="get" resultType="SmInquiryAdviceCopy">
+		SELECT 
+			<include refid="smInquiryAdviceCopyColumns"/>
+		FROM sm_inquiry_advice_copy a
+		<include refid="smInquiryAdviceCopyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmInquiryAdviceCopy">
+		SELECT 
+			<include refid="smInquiryAdviceCopyColumns"/>
+		FROM sm_inquiry_advice_copy a
+		<include refid="smInquiryAdviceCopyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="inqu != null and inqu.id != null and inqu.id != ''">
+				AND a.inqu_id = #{inqu.id}
+			</if>
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illrea_id = #{illrea.id}
+			</if>
+			<if test="reStatus != null and reStatus != ''">
+				AND a.re_status = #{reStatus}
+			</if>
+			<if test="adv != null and adv.id != null and adv.id != ''">
+				AND a.adv_id = #{adv.id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+			<if test="answerIllrea != null and answerIllrea.id != null and answerIllrea.id != ''">
+				AND a.answer_illrea_id = #{answerIllrea.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmInquiryAdviceCopy">
+		SELECT 
+			<include refid="smInquiryAdviceCopyColumns"/>
+		FROM sm_inquiry_advice_copy a
+		<include refid="smInquiryAdviceCopyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_inquiry_advice_copy(
+			id,
+			inqu_id,
+			re_status,
+			illrea_id,
+			illreaname,
+			illreadesc,
+			adv_id,
+			name,
+			description,
+			create_date,
+			update_date,
+			del_flag,
+			state,
+			answer_illrea_id,
+			old_id
+		) VALUES (
+			#{id},
+			#{inqu.id},
+			#{reStatus},
+			#{illrea.id},
+			#{illreaname},
+			#{illreadesc},
+			#{adv.id},
+			#{name},
+			#{description},
+			#{createDate},
+			#{updateDate},
+			#{delFlag},
+			#{state},
+			#{answerIllrea.id},
+			#{old.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_inquiry_advice_copy SET 	
+			inqu_id = #{inqu.id},
+			re_status = #{reStatus},
+			illrea_id = #{illrea.id},
+			illreaname = #{illreaname},
+			illreadesc = #{illreadesc},
+			adv_id = #{adv.id},
+			name = #{name},
+			description = #{description},
+			update_date = #{updateDate},
+			state = #{state},
+			answer_illrea_id = #{answerIllrea.id},
+			old_id = #{old.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateByOldId">
+		UPDATE sm_inquiry_advice_copy SET 	
+			<!-- name = #{name}, -->
+			description = #{description}	
+		WHERE old_id = #{old.id}
+	</update>
+	 
+	<update id="delete">
+		UPDATE sm_inquiry_advice_copy SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id} 
+	</update>
+	
+</mapper>

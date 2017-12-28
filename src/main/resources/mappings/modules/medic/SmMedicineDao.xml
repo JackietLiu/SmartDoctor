@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.medic.dao.SmMedicineDao">
+    
+	<sql id="smMedicineColumns">
+		a.id AS "id",
+		a.med_name AS "medName",
+		a.dose AS "dose",
+		a.medication AS "medication",
+		a.dose_unit AS "doseUnit",
+		a.medication_unit AS "medicationUnit",
+		a.effects AS "effects",
+		a.work_time AS "workTime",
+		a.duration_time AS "durationTime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="smMedicineJoins">
+	</sql>
+    
+	<select id="get" resultType="SmMedicine">
+		SELECT 
+			<include refid="smMedicineColumns"/>
+		FROM sm_medicine a
+		<include refid="smMedicineJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmMedicine">
+		SELECT 
+			<include refid="smMedicineColumns"/>
+		FROM sm_medicine a
+		<include refid="smMedicineJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="medName != null and medName != ''">
+				AND a.med_name LIKE 
+					<if test="dbName == 'oracle'">'%'||  #{medName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+  #{medName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%', #{medName},'%')</if> 
+			</if>
+		</where>
+		<choose> 
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmMedicine">
+		SELECT 
+			<include refid="smMedicineColumns"/>
+		FROM sm_medicine a
+		<include refid="smMedicineJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_medicine(
+			id,
+			med_name,
+			dose,
+			medication,
+			dose_unit,
+			medication_unit,
+			effects,
+			work_time,
+			duration_time,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{medName},
+			#{dose},
+			#{medication},
+			#{doseUnit},
+			#{medicationUnit},
+			#{effects},
+			#{workTime},
+			#{durationTime},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_medicine SET 	
+			med_name = #{medName},
+			dose = #{dose},
+			medication = #{medication},
+			dose_unit = #{doseUnit},
+			medication_unit = #{medicationUnit},
+			effects = #{effects},
+			work_time = #{workTime},
+			duration_time = #{durationTime},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_medicine SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

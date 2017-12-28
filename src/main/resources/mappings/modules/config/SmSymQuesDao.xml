@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.config.dao.SmSymQuesDao">
+    
+	<sql id="smSymQuesColumns">
+		a.id AS "id",
+		a.sym_id AS "sym.id",
+		a.ques_id AS "question.id",
+		a.opt_id as "option.id",
+		a.sort AS "sort",
+		a.qy_status AS "qyStatus",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.is_first AS "isFirst",
+		a.is_last as "isLast" ,
+		a.illre_id as "illreason.id",
+		a.lastques_id as "lastQuestion.id",
+		a.state as "state",
+		a.dept as "dept",
+		a.dept_pid as "deptPid",
+		a.dept_fid as "deptFid",
+		b.name as "sym.name" ,
+		c.name as "question.name",
+		d.name as "option.name",
+		e.name as "illreason.name",
+		f.name as "lastQuestion.name",
+		a.percent AS "percent",
+		c.ques_type AS "question.quesType",
+		a.ques_type AS "quesType",
+		a.age_id AS "ageRange.id"
+		
+	</sql>
+	
+	<sql id="smSymQuesJoins">
+	left join sm_symptom b on b.id = a.sym_id
+	left join sm_question c on c.id = a.ques_id
+	left join sm_option d on d.id= a.opt_id
+	left join sm_illreason e on e.id= a.illre_id
+	left join sm_question f on f.id = a.lastques_id
+	left join sm_age g on g.id = a.age_id
+	</sql>
+    
+	<select id="get" resultType="SmSymQues">
+		SELECT 
+			<include refid="smSymQuesColumns"/>
+		FROM sm_sym_ques a
+		<include refid="smSymQuesJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getQuestionBySort" resultType="SmSymQues" parameterType="SmSymQues">
+		SELECT 
+			<include refid="smSymQuesColumns"/>
+		FROM sm_sym_ques a
+		<include refid="smSymQuesJoins"/>
+		<where>a.del_flag = #{DEL_FLAG_NORMAL} and a.state = #{state} and a.is_first=#{isFirst} and a.qy_status = #{qyStatus} 
+			<if test="illreason != null and illreason != null and illreason.id != ''">
+					AND a.illre_id = #{illreason.id}
+			</if>
+			<if test="sym != null and sym.id != null and sym.id != ''">
+			  AND a.sym_id = #{sym.id}
+			</if>
+			<if test="ageRange != null and ageRange.id != null and ageRange.id != ''">
+			  AND a.age_id = #{ageRange.id}
+			</if>
+			<if test="option != null and option.id != null and option.id != ''">
+				AND a.opt_id = #{option.id}
+			</if>
+			 <if test="quesType != null and quesType != ''">
+				AND (a.ques_type = #{quesType} OR a.ques_type='3')
+			</if>  
+			<if test="deptFid != null and deptFid != ''">
+				AND a.dept_fid = #{deptFid}
+			</if>
+			<if test="dept != null and dept != ''">
+				AND a.dept > #{dept}
+			</if>
+		</where>
+		ORDER BY a.dept
+		limit 1
+	</select>
+	
+	<select id="findList" resultType="SmSymQues">
+		SELECT 
+			<include refid="smSymQuesColumns"/>
+		FROM sm_sym_ques a
+		<include refid="smSymQuesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="sym != null and sym.id != null and sym.id != ''">
+				AND a.sym_id = #{sym.id}
+			</if>
+			<if test="question != null and question.id != null and question.id != ''">
+				AND a.ques_id = #{question.id}
+			</if>
+			<if test="option != null and option.id != null and option.id != ''">
+				AND a.opt_id = #{option.id}
+			</if>
+			<if test="sort != null and sort != ''">
+				AND a.sort = #{sort}
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+			<if test="isFirst != null and isFirst != ''">
+				AND a.is_first = #{isFirst}
+			</if>
+			<if test="illreason != null and illreason != null and illreason.id != ''">
+				AND a.illre_id = #{illreason.id}
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+			<if test="dept != null and dept != ''">
+				AND a.dept = #{dept}
+			</if>
+			<if test="deptPid != null and deptPid != ''">
+				AND a.dept_pid = #{deptPid}
+			</if>
+			<if test="deptFid != null and deptFid != ''">
+				AND a.dept_fid = #{deptFid}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.state ASC ,a.is_first DESC,a.dept_pid ASC,a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmSymQues">
+		SELECT 
+			<include refid="smSymQuesColumns"/>
+		FROM sm_sym_ques a
+		<include refid="smSymQuesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_sym_ques(
+			id,
+			sym_id,
+			ques_id,
+			opt_id ,
+			sort,
+			qy_status,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			is_first,
+			is_last,
+			illre_id,
+			state,
+			lastques_id,
+			dept,
+			dept_pid,
+			dept_fid,
+			percent,
+			ques_type,
+			age_id 
+		) VALUES (
+			#{id},
+			#{sym.id},
+			#{question.id},
+			#{option.id},
+			#{sort},
+			#{qyStatus},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{isFirst},
+			#{isLast},
+			#{illreason.id},
+			#{state},
+			#{lastQuestion.id},
+			#{dept},
+			#{deptPid},
+			#{deptFid},
+			#{percent},
+			#{quesType},
+			#{ageRange.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_sym_ques SET 	
+			sym_id = #{sym.id},
+			ques_id = #{question.id},
+			opt_id = #{option.id},
+			sort = #{sort},
+			qy_status = #{qyStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			is_first = #{isFirst},
+			is_last = #{isLast},
+			state = #{state},
+			dept = #{dept},
+			dept_pid = #{deptPid},
+			dept_fid = #{deptFid},
+			illre_id = #{illreason.id},
+			lastques_id = #{lastQuestion.id},
+			percent = #{percent},
+			ques_type = #{quesType},
+			age_id = #{ageRange.id}
+		WHERE id = #{id}
+		
+		
+	</update>
+	<select id="percent" resultType="SmSymQues">
+		SELECT percent 
+		FROM sm_sym_ques 
+		WHERE illre_id = #{illreason.id} and ques_id = #{question.id}
+	</select>
+	<update id="delete">
+		UPDATE sm_sym_ques SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

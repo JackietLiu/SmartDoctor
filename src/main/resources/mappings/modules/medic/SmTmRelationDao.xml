@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.medic.dao.SmTmRelationDao">
+    
+	<sql id="smTmRelationColumns">
+		a.id AS "id",
+		a.type_id AS "type.id",
+		a.med_id AS "med.id",
+		c.type_name AS "type.typeName",
+		b.med_name AS "med.medName",
+		b.dose AS "med.dose",
+		b.medication AS "med.medication",
+		b.dose_unit AS "med.doseUnit",
+		b.medication_unit AS "med.medicationUnit",
+		b.effects AS "med.effects",
+		b.work_time AS "med.workTime",
+		b.duration_time AS "med.durationTime",				
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag" 
+	</sql>
+	
+	<sql id="smTmRelationJoins">
+	LEFT JOIN sm_medicine b ON a.med_id = b.id
+	LEFT JOIN sm_medicine_type c ON a.type_id = c.id
+	 
+	</sql>
+    
+	<select id="get" resultType="SmTmRelation">
+		SELECT 
+			<include refid="smTmRelationColumns"/>
+		FROM sm_tm_relation a
+		<include refid="smTmRelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmTmRelation">
+		SELECT 
+			<include refid="smTmRelationColumns"/>
+		FROM sm_tm_relation a
+		<include refid="smTmRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="type != null and type.typeName != null and type.typeName != ''">
+				AND c.type_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{type.typeName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{type.typeName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{type.typeName},'%')</if> 
+			</if>
+			<if test="type != null and type.id != null and type.id != ''">
+				AND c.id = #{type.id}
+			</if>
+			<if test="med != null and med.medName != null and med.medName != ''">
+				AND b.med_name  LIKE 
+					<if test="dbName == 'oracle'">'%'|| #{med.medName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+ #{med.medName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%', #{med.medName},'%')</if> 
+			</if>
+		</where> 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmTmRelation">
+		SELECT 
+			<include refid="smTmRelationColumns"/>
+		FROM sm_tm_relation a
+		<include refid="smTmRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_tm_relation(
+			id,
+			type_id,
+			med_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{type.id},
+			#{med.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_tm_relation SET 	
+			type_id = #{type.id},
+			med_id = #{med.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_tm_relation SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

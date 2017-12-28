@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.advice.dao.SmAdviseDao">
+    
+	<sql id="smAdviseColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.med_id AS "med.id",
+		a.heath_id AS "heath.id",
+		a.description AS "description",
+		a.qy_status AS "qyStatus",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.period AS "period",
+		a.period_unit AS"periodUnit",
+		a.dt_nextvisit AS "dt_nextvisit",
+		c.food AS "heath.food",
+		c.suggest AS "heath.suggest",
+		b.med_name AS "med.medName",
+		b.dose AS "med.dose",
+		b.medication AS "med.medication",
+		b.dose_unit AS "med.doseUnit",
+		b.medication_unit AS "med.medicationUnit",
+		b.effects AS "med.effects",
+		b.work_time AS "med.workTime",
+		b.duration_time AS "med.durationTime"
+		
+	</sql>
+	
+	<sql id="smAdviseJoins">
+	    LEFT JOIN sm_medicine b ON a.med_id=b.id
+	    LEFT JOIN sm_healthy c ON c.id=a.heath_id
+	
+	</sql>
+    
+	<select id="get" resultType="SmAdvise">
+		SELECT 
+			<include refid="smAdviseColumns"/>
+		FROM sm_advise a
+		<include refid="smAdviseJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmAdvise">
+		SELECT 
+			<include refid="smAdviseColumns"/>
+		FROM sm_advise a
+		<include refid="smAdviseJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmAdvise">
+		SELECT 
+			<include refid="smAdviseColumns"/>
+		FROM sm_advise a
+		<include refid="smAdviseJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_advise(
+			id,
+			name,
+			description,
+			qy_status,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			del_flag,
+			heath_id,
+			med_id,
+			dt_nextvisit,
+			period,
+			period_unit
+		) VALUES (
+			#{id},
+			#{name},
+			#{description},
+			#{qyStatus},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{heath.id},
+			#{med.id},
+			#{dtNextvisit},
+			#{period},
+			#{periodUnit}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_advise SET 	
+			name = #{name},
+			description = #{description},
+			qy_status = #{qyStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			heath_id=#{heath.id},
+			med_id=#{med.id},
+			dt_nextvisit=#{dtNextvisit},
+			period = #{period},
+			period_unit = #{periodUnit}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_advise SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

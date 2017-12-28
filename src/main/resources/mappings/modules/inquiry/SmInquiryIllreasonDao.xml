@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.inquiry.dao.SmInquiryIllreasonDao">
+    
+	<sql id="smInquiryIllreasonColumns">
+		a.id AS "id",
+		a.inqu_id AS "inqu.id",
+		a.re_status AS "reStatus",
+		a.illrea_id AS "illrea.id",
+		a.illrea_name AS "illreaName",
+		a.illrea_desc AS "illreaDesc",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.state as "state",
+		a.answer_illrea_id as "answerIllrea.id"
+	</sql>
+	
+	<sql id="smInquiryIllreasonJoins">
+	</sql>
+    
+	<select id="get" resultType="SmInquiryIllreason">
+		SELECT 
+			<include refid="smInquiryIllreasonColumns"/>
+		FROM sm_inquiry_illreason a
+		<include refid="smInquiryIllreasonJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	
+	<select id="findFirst" resultType="SmInquiryIllreason" parameterType="SmInquiryIllreason">
+		SELECT 
+			<include refid="smInquiryIllreasonColumns"/>
+		FROM sm_inquiry_illreason a
+		<include refid="smInquiryIllreasonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="inqu != null and inqu.id != null and inqu.id != ''">
+				AND a.inqu_id = #{inqu.id}
+			</if>
+			<if test="reStatus != null and reStatus != ''">
+				AND a.re_status = #{reStatus}
+			</if>
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illrea_id = #{illrea.id}
+			</if>
+			<if test="illreaName != null and illreaName != ''">
+				AND a.illrea_name = #{illreaName}
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+			<if test="answerIllrea != null and answerIllrea.id != null and answerIllrea.id != ''">
+				AND a.answer_illrea_id = #{answerIllrea.id}
+			</if>
+		</where>
+	 order by	a.create_date desc 
+		limit 0,1
+	</select>
+	
+	<select id="findList" resultType="SmInquiryIllreason">
+		SELECT 
+			<include refid="smInquiryIllreasonColumns"/>
+		FROM sm_inquiry_illreason a
+		<include refid="smInquiryIllreasonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="inqu != null and inqu.id != null and inqu.id != ''">
+				AND a.inqu_id = #{inqu.id}
+			</if>
+			<if test="reStatus != null and reStatus != ''">
+				AND a.re_status = #{reStatus}
+			</if>
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illrea_id = #{illrea.id}
+			</if>
+			<if test="illreaName != null and illreaName != ''">
+				AND a.illrea_name = #{illreaName}
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+			<if test="answerIllrea != null and answerIllrea.id != null and answerIllrea.id != ''">
+				AND a.answer_illrea_id = #{answerIllrea.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmInquiryIllreason">
+		SELECT 
+			<include refid="smInquiryIllreasonColumns"/>
+		FROM sm_inquiry_illreason a
+		<include refid="smInquiryIllreasonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_inquiry_illreason(
+			id,
+			inqu_id,
+			re_status,
+			illrea_id,
+			illrea_name,
+			illrea_desc,
+			create_date,
+			update_date,
+			del_flag,
+			state,
+			answer_illrea_id
+		) VALUES (
+			#{id},
+			#{inqu.id},
+			#{reStatus},
+			#{illrea.id},
+			#{illreaName},
+			#{illreaDesc},
+			#{createDate},
+			#{updateDate},
+			#{delFlag},
+			#{state},
+			 #{answerIllrea.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_inquiry_illreason SET 	
+			inqu_id = #{inqu.id},
+			re_status = #{reStatus},
+			illrea_id = #{illrea.id},
+			illrea_name = #{illreaName},
+			illrea_desc = #{illreaDesc},
+			update_date = #{updateDate},
+			state = #{state},
+			answer_illrea_id = #{answerIllrea.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_inquiry_illreason SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

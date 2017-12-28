@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.match.dao.SmMatchOptDao">
+    
+	<sql id="smMatchOptColumns">
+		a.id AS "id",
+		a.matc_id AS "matc.id",
+		a.sym_id AS "sym.id",
+		a.ques_id AS "ques.id",
+		a.opt_id AS "opt.id",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.qy_status AS "qyStatus",
+		b.name as "matc.name",
+		c.name as "sym.name",
+		d.name as "ques.name",
+		e.name as "opt.name" ,
+		e.sort as "opt.sort" ,
+		a.is_last as "isLast"
+	</sql>
+	
+	<sql id="smMatchOptJoins">
+	left join sm_illreason_match b on b.id = a.matc_id
+	left join sm_symptom c on c.id = a.sym_id
+	left join sm_question d on d.id = a.ques_id
+	left join sm_option e on e.id = a.opt_id
+	</sql>
+    
+	<select id="get" resultType="SmMatchOpt">
+		SELECT 
+			<include refid="smMatchOptColumns"/>
+		FROM sm_match_opt a
+		<include refid="smMatchOptJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmMatchOpt">
+		SELECT 
+			<include refid="smMatchOptColumns"/>
+		FROM sm_match_opt a
+		<include refid="smMatchOptJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="matc != null and matc.id != null and matc.id != ''">
+				AND a.matc_id = #{matc.id}
+			</if>
+			<if test="sym != null and sym.id != null and sym.id != ''">
+				AND a.sym_id = #{sym.id}
+			</if>
+			<if test="ques != null and ques.id != null and ques.id != ''">
+				AND a.ques_id = #{ques.id}
+			</if>
+			<if test="opt != null and opt.id != null and opt.id != ''">
+				AND a.opt_id = #{opt.id}
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmMatchOpt">
+		SELECT 
+			<include refid="smMatchOptColumns"/>
+		FROM sm_match_opt a
+		<include refid="smMatchOptJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_match_opt(
+			id,
+			matc_id,
+			sym_id,
+			ques_id,
+			opt_id,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			qy_status ,
+			is_last
+		) VALUES (
+			#{id},
+			#{matc.id},
+			#{sym.id},
+			#{ques.id},
+			#{opt.id},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{qyStatus},
+			#{isLast}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_match_opt SET 	
+			matc_id = #{matc.id},
+			sym_id = #{sym.id},
+			ques_id = #{ques.id},
+			opt_id = #{opt.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			qy_status = #{qyStatus},
+			is_last = #{isLast}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_match_opt SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findExistQuestList" resultType="SmMatchOpt" parameterType="SmMatchOpt">
+		SELECT 
+			<include refid="smMatchOptColumns"/>
+		FROM sm_match_opt a
+		<include refid="smMatchOptJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="matc != null and matc.id != null and matc.id != ''">
+				AND a.matc_id = #{matc.id}
+			</if>
+			<if test="ques != null and ques.id != null and ques.id != ''">
+				AND a.ques_id = #{ques.id}
+			</if>
+			<if test="id != null and id != ''">
+				AND  <![CDATA[a.id <> #{id}]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findListGroupBy" resultType="SmMatchOpt" parameterType="SmMatchOpt">
+		SELECT 
+			<include refid="smMatchOptColumns"/>
+		FROM sm_match_opt a
+		<include refid="smMatchOptJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="matc != null and matc.id != null and matc.id != ''">
+				AND a.matc_id = #{matc.id}
+			</if>
+			<if test="sym != null and sym.id != null and sym.id != ''">
+				AND a.sym_id = #{sym.id}
+			</if>
+			<if test="ques != null and ques.id != null and ques.id != ''">
+				AND a.ques_id = #{ques.id}
+			</if>
+			<if test="opt != null and opt.id != null and opt.id != ''">
+				AND a.opt_id = #{opt.id}
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+		</where>
+		GROUP BY a.matc_id
+	</select>
+	
+</mapper>

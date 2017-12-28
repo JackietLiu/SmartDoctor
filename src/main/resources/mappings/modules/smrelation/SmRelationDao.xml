@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.smrelation.dao.SmRelationDao">
+    
+	<sql id="smRelationColumns">
+		a.id AS "id",
+		a.sq_id AS "smSymQues.id",
+		a.ques_id AS "question.id",
+		a.ir_id AS "illreaon.id",
+		a.sym_id AS "symptom.id",
+		a.opt_id AS "option.id",
+		a.percent AS "percent",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		b.name as "question.name",
+		c.name as "option.name",
+		d.name as "illreaon.name",
+		e.name as "symptom.name"
+	</sql>
+	
+	<sql id="smRelationJoins">
+	left join sm_question b on b.id = a.ques_id
+	left join sm_option c on c.id = a.opt_id
+	left join sm_illreason d on d.id = a.ir_id
+	left join sm_symptom e on e.id = a.sym_id
+	</sql>
+    
+	<select id="get" resultType="SmRelation">
+		SELECT 
+			<include refid="smRelationColumns"/>
+		FROM sm_sym_ques_illreason a
+		<include refid="smRelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmRelation">
+		SELECT 
+			<include refid="smRelationColumns"/>
+		FROM sm_sym_ques_illreason a
+		<include refid="smRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="question != null and question.id != null and question.id != ''">
+				AND a.ques_id = #{question.id}
+			</if>
+			<if test="illreaon != null and illreaon.id != null and illreaon.id != ''">
+				AND a.ir_id = #{illreaon.id}
+			</if>
+			<if test="symptom != null and symptom.id != null and symptom.id != ''">
+				AND a.sym_id = #{symptom.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getPercent" resultType="SmRelation">
+		SELECT 		
+			a.percent	
+		FROM sm_sym_ques_illreason a		
+		WHERE a.ques_id = #{question.id}  AND a.ir_id = #{illreaon.id} 
+	</select>
+	
+	<select id="getQuesByIrId" resultType="SmRelation">
+		SELECT 		
+			a.ques_id	
+		FROM sm_sym_ques_illreason a		
+		WHERE a.ir_id = #{illreaon.id}
+	</select>
+	
+	<select id="findFirst" resultType="SmRelation" parameterType="SmRelation">
+		SELECT 
+			<include refid="smRelationColumns"/>
+		FROM sm_sym_ques_illreason a
+		<include refid="smRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="smSymQues != null and smSymQues.id != null and smSymQues.id != ''">
+				AND a.sq_id = #{smSymQues.id}
+			</if>
+			<if test="question != null and question.id != null and question.id != ''">
+				AND a.ques_id = #{question.id}
+			</if>
+			<if test="illreaon != null and illreaon.id != null and illreaon.id != ''">
+				AND a.ir_id = #{illreaon.id}
+			</if>
+			<if test="symptom != null and symptom.id != null and symptom.id != ''">
+				AND a.sym_id = #{symptom.id}
+			</if>
+		</where>
+		order by a.create_date DESC 
+		limit 0,1
+	</select>
+	<select id="findAllList" resultType="SmRelation">
+		SELECT 
+			<include refid="smRelationColumns"/>
+		FROM sm_sym_ques_illreason a
+		<include refid="smRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_sym_ques_illreason(
+			id,
+			sq_id,
+			ques_id,
+			ir_id,
+			sym_id,
+			percent,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{smSymQues.id},
+			#{question.id},
+			#{illreaon.id},
+			#{symptom.id},
+			#{percent},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_sym_ques_illreason SET 	
+			sq_id = #{smSymQues.id},
+			ques_id = #{question.id},
+			ir_id = #{illreaon.id},
+			sym_id = #{symptom.id},
+			percent = #{percent},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_sym_ques_illreason SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

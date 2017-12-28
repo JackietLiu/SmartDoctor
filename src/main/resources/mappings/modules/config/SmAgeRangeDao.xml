@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.config.dao.SmAgeRangeDao">
+    
+	<sql id="smAgeRangeColumns">
+		a.id AS "id",
+		a.max_age AS "maxAge",
+		a.min_age AS "minAge",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="smAgeRangeJoins">
+	</sql>
+    
+	<select id="get" resultType="SmAgeRange">
+		SELECT 
+			<include refid="smAgeRangeColumns"/>
+		FROM sm_age a
+		<include refid="smAgeRangeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmAgeRange">
+		SELECT 
+			<include refid="smAgeRangeColumns"/>
+		FROM sm_age a
+		<include refid="smAgeRangeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmAgeRange">
+		SELECT 
+			<include refid="smAgeRangeColumns"/>
+		FROM sm_age a
+		<include refid="smAgeRangeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_age(
+			id,
+			max_age,
+			min_age,
+			del_flag
+		) VALUES (
+			#{id},
+			#{maxAge},
+			#{minAge},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_age SET 	
+			max_age = #{maxAge},
+			min_age = #{minAge}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_age SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

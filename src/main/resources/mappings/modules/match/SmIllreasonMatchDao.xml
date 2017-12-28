@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.match.dao.SmIllreasonMatchDao">
+    
+	<sql id="smIllreasonMatchColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.illrea_id AS "illrea.id",
+		a.qy_status AS "qyStatus",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		b.name as "illrea.name"
+	</sql>
+	
+	<sql id="smIllreasonMatchJoins">
+	left join sm_illreason b on a.illrea_id = b.id
+	</sql>
+    
+	<select id="get" resultType="SmIllreasonMatch">
+		SELECT 
+			<include refid="smIllreasonMatchColumns"/>
+		FROM sm_illreason_match a
+		<include refid="smIllreasonMatchJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmIllreasonMatch">
+		SELECT 
+			<include refid="smIllreasonMatchColumns"/>
+		FROM sm_illreason_match a
+		<include refid="smIllreasonMatchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illrea_id = #{illrea.id}
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmIllreasonMatch">
+		SELECT 
+			<include refid="smIllreasonMatchColumns"/>
+		FROM sm_illreason_match a
+		<include refid="smIllreasonMatchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_illreason_match(
+			id,
+			name,
+			illrea_id,
+			qy_status,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{illrea.id},
+			#{qyStatus},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_illreason_match SET 	
+			name = #{name},
+			illrea_id = #{illrea.id},
+			qy_status = #{qyStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_illreason_match SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

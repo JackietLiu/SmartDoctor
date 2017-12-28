@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.basic.dao.SmIllreasonDao">
+    
+	<sql id="smIllreasonColumns">
+		a.id AS "id",
+		a.name as "name",
+		a.sym_id AS "sym.id",
+		a.description AS "description",
+		a.qy_status AS "qyStatus",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		b.name as "sym.name"
+	</sql>
+	
+	<sql id="smIllreasonJoins">
+	left join sm_symptom b on b.id = a.sym_id
+	</sql>
+    
+	<select id="get" resultType="SmIllreason">
+		SELECT 
+			<include refid="smIllreasonColumns"/>
+		FROM sm_illreason a
+		<include refid="smIllreasonJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmIllreason">
+		SELECT 
+			<include refid="smIllreasonColumns"/>
+		FROM sm_illreason a
+		<include refid="smIllreasonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="sym != null and sym.id != null and sym.id != ''">
+				AND a.sym_id = #{sym.id}
+			</if>
+			<if test="id != null  and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmIllreason">
+		SELECT 
+			<include refid="smIllreasonColumns"/>
+		FROM sm_illreason a
+		<include refid="smIllreasonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_illreason(
+			id,
+			sym_id,
+			name,
+			description,
+			qy_status,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{sym.id},
+			#{name},
+			#{description},
+			#{qyStatus},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_illreason SET 	
+			sym_id = #{sym.id},
+			name = #{name},
+			description = #{description},
+			qy_status = #{qyStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_illreason SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

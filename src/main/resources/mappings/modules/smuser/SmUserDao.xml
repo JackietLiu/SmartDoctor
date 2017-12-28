@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.smuser.dao.SmUserDao">
+    
+	<sql id="smUserColumns">
+		a.id AS "id",
+		a.card_no AS "cardNo",
+		a.sex AS "sex",
+		a.name AS "name",
+		a.birth AS "birth",
+		DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(birth, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') <![CDATA[<]]> DATE_FORMAT(birth, '00-%m-%d')) AS age
+	</sql>
+	
+	<sql id="smUserJoins">
+	</sql>
+    
+	<select id="get" resultType="SmUser">
+		SELECT 
+			<include refid="smUserColumns"/>
+		FROM sm_user a
+		<include refid="smUserJoins"/>
+		WHERE a.card_no = #{cardNo}
+	</select>
+	
+	<select id="findList" resultType="SmUser">
+		SELECT 
+			<include refid="smUserColumns"/>
+		FROM sm_user a
+		<include refid="smUserJoins"/>
+		<where>
+			
+			<if test="cardNo != null and cardNo != ''">
+				AND a.card_no = #{cardNo}
+			</if>
+			<if test="sex != null and sex != ''">
+				AND a.sex = #{sex}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmUser">
+		SELECT 
+			<include refid="smUserColumns"/>
+		FROM sm_user a
+		<include refid="smUserJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_user(
+			id,
+			card_no,
+			sex,
+			name,
+			birth
+		) VALUES (
+			#{id},
+			#{cardNo},
+			#{sex},
+			#{name},
+			#{birth}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_user SET 	
+			card_no = #{cardNo},
+			sex = #{sex},
+			name = #{name},
+			birth = #{birth}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM sm_user
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

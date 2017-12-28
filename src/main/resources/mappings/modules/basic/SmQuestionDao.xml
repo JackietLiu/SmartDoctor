@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.basic.dao.SmQuestionDao">
+    
+	<sql id="smQuestionColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.description AS "description",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.qy_status AS "qyStatus",
+		a.ques_type AS "quesType",
+		a.age_id AS "ageRange.id"
+		
+	</sql>
+	
+	<sql id="smQuestionJoins">
+	left join sm_age b on b.id = a.age_id
+	</sql>
+    
+	<select id="get" resultType="SmQuestion">
+		SELECT 
+			<include refid="smQuestionColumns"/>
+		FROM sm_question a
+		<include refid="smQuestionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmQuestion">
+		SELECT 
+			<include refid="smQuestionColumns"/>
+		FROM sm_question a
+		<include refid="smQuestionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmQuestion">
+		SELECT 
+			<include refid="smQuestionColumns"/>
+		FROM sm_question a
+		<include refid="smQuestionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_question(
+			id,
+			name,
+			description,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			qy_status,
+			ques_type,
+			age_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{description},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{qyStatus},
+			#{quesType},
+			#{ageRange.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_question SET 	
+			name = #{name},
+			description = #{description},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			qy_status = #{qyStatus},
+			ques_type = #{quesType},
+			age_id = #{ageRange.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_question SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

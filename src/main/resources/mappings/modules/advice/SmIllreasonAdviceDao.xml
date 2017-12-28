@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.advice.dao.SmIllreasonAdviceDao">
+    
+	<sql id="smIllreasonAdviceColumns">
+		a.id AS "id",
+		a.illr_id AS "illrea.id",
+		a.adv_id AS "advise.id",
+		a.qy_status AS "qyStatus",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		b.name as "illrea.name",
+		c.name as "advise.name",
+		c.description as "advise.description"
+	</sql>
+	
+	<sql id="smIllreasonAdviceJoins">
+		left join sm_illreason b on b.id = a.illr_id
+		left join sm_advise c on c.id = a.adv_id
+	</sql>
+    
+	<select id="get" resultType="SmIllreasonAdvice">
+		SELECT 
+			<include refid="smIllreasonAdviceColumns"/>
+		FROM sm_illreason_advice a
+		<include refid="smIllreasonAdviceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SmIllreasonAdvice">
+		SELECT 
+			<include refid="smIllreasonAdviceColumns"/>
+		FROM sm_illreason_advice a
+		<include refid="smIllreasonAdviceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="illrea != null and illrea.id != null and illrea.id != ''">
+				AND a.illr_id = #{illrea.id}
+			</if>
+			<if test="advise != null and advise.id != null and advise.id != ''">
+				AND a.adv_id = #{advise.id}
+			</if>
+			<if test="qyStatus != null and qyStatus != ''">
+				AND a.qy_status = #{qyStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SmIllreasonAdvice">
+		SELECT 
+			<include refid="smIllreasonAdviceColumns"/>
+		FROM sm_illreason_advice a
+		<include refid="smIllreasonAdviceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sm_illreason_advice(
+			id,
+			illr_id,
+			adv_id,
+			qy_status,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{illrea.id},
+			#{advise.id},
+			#{qyStatus},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sm_illreason_advice SET 	
+			illr_id = #{illrea.id},
+			adv_id = #{advise.id},
+			qy_status = #{qyStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sm_illreason_advice SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
